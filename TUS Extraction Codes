@@ -1,0 +1,119 @@
+Extraction of Household File and Person File in TEXT FORMAT OF TUS 2024. 
+STEP-by-STEP USING STATA. 
+
+PRELIMINARY SUGGESTIONS
+
+***Download textfiles (available at MOSPI/ microdata website as .txt file. There are two files, HH is household information and PER is person level information***
+
+***Once downloaded, save it as HH and PER File. Next line onwards, "location HH" refer to your desktop location of HH text data file and "location PER" refer to the same for your person text data file, TUS 2024. ***
+
+## HH File Extraction## 
+#STEP 1: Creating a Dictionary# 
+1. OPEN STATA DO FILE EDITOR
+##CODE STARTS FROM LINE 14 ## 
+dictionary using "location HH"{
+str3 V1 %3s "Schedule ID"
+str5 V2 %5s "FSU Serial No."
+str3 V3 %3s "Schedule"
+str4 V4 %4s "survey year"
+str1 V5 %1s "Sector"
+str3 V6 %3s "NSS-Region"
+str2 V7 %2s "District"
+str3 V8 %3s "Stratum"
+str3 V9 %3s "Sub-Stratum"
+str1 V10 %1s "Sub-Round"
+str4 V11 %4s "FOD Sub-Region"
+str2 V12 %2s "Sample hhld. No."
+str3 V13 %3s "Informant Sl.No."
+str1 V14 %1s "Response Code"
+str1 V15 %1s "Survey Code"
+str1 V16 %1s "Reason for substitution of original household"
+str3 V17 %3s "Household size"
+str1 V18 %1s "religion"
+str1 V19 %1s "Social group "
+str2 V20 %2s "Land possessed as on date of survey(code)"
+str10 V21 %10s "usual consumer expenditure in a month for household purposes out of purchase (A)"
+str10 V22 %10s "imputed value of usual consumption in a month from home grown stock (B)"
+str10 V23 %10s "imputed value of usual consumption in a month from wages in kind, free collection, gifts, etc (C )"
+str10 V24 %10s "expenditure on purchase of items like clothing, footwear etc. during last 365 days (D)"
+str10 V25 %10s "expenditure on purchase of household durable during last 365 days (E)"
+str10 V26 %10s "usual monthly consumer expenditure E: [A+B+C+(D+E)/12]"
+str2 V27 %2s "Primary source of energey for cooking"
+str1 V28 %1s "Primary source of energey for lighting"
+str1 V29 %1s "Type of washing of clothes"
+str1 V30 %1s "Type of sweeping of floor"
+str1 V31 %1s "Dwelling unit"
+str1 V32 %1s "Type of structure of the dwelling unit"
+str1 V33 %1s "Is there any member in the household aged 5 years and above who needs special care"
+str1 V34 %1s "Is there any care giver available among the household members for caring the person(s)"
+str3 V35 %3s "Time to canvass(minutes)"
+str3 V36 %3s "NSC"
+str10 V37 %10s "MULT"
+}
+##CODE END AT LINE 51## 
+
+##GO TO SAVE AS MENU, CHANGE FILE TYPE AS .dct and SAVE FILE. 
+##SAVE THIS Dictionary File (.dct).## 
+FOR EXAMPLE, it should read something like : "D:\Time Use Data\Time Use 2024\HH TUS 2024.dct" 
+
+## Extraction using Dictionary 
+
+## OPEN STATA COMMAND PROMPT 
+##CODE START, LINE 63##
+infile using ""D:\Time Use Data\Time Use 2024\HH TUS 2024.dct"  [Instruction: I am using the example location, you should use your dictionary file location] 
+SAVE THE .DTA FILE EXTRACTED and READ IN STATA. 
+
+***IF YOU HAVE UNDERSTOOD TILL THIS FAR*** 
+***FOLLOWING IS A REPEAT EXERCISE FOR THE PERSON FILE DICTIONARY*** 
+
+#CODE STARTS FROM LINE 70# 
+dictionary using "location PER"{
+str3 PV1 %3s "Schedule ID"
+str5 PV2 %5s "FSU Serial No."
+str3 PV3 %3s "Schedule"
+str4 PV4 %4s "survey year"
+str1 PV5 %1s "Sector"
+str3 PV6 %3s "NSS-Region"
+str2 PV7 %2s "District"
+str3 PV8 %3s "Stratum"
+str3 PV9 %3s "Sub-Stratum"
+str1 PV10 %1s "Sub-Round"
+str4 PV11 %4s "FOD Sub-Region"
+str2 PV12 %2s "Sample hhld. No."
+str3 PV13 %3s "Person serial no."
+str1 PV14 %1s "Relation to head"
+str1 PV15 %1s "Gender"
+str3 PV16 %3s "Age"
+str1 PV17 %1s "marital status"
+str2 PV18 %2s "highest level of education"
+str2 PV19 %2s "usual principal activity status (code)"
+str2 PV20 %2s "industry of work: 2-digit of NIC 2008"
+str3 PV21 %3s "srl. No of member"
+str3 PV22 %3s "age"
+str3 PV23 %3s "Serial number of the informant"
+str1 PV24 %1s "Gender of the informant"
+str1 PV25 %1s "day of week"
+str1 PV26 %1s "type of the day"
+str1 PV27 %1s "response code"
+str3 PV28 %3s "Serial no.of member"
+str3 PV29 %3s "age"
+str3 PV30 %3s "srl. No of activity"
+str5 PV31 %5s "time from (HH:MM)"
+str5 PV32 %5s "time to (HH:MM)"
+str1 PV33 %1s "whether performed multiple activity in the time slot"
+str1 PV34 %1s "whether simultaneous activity"
+str1 PV35 %1s "whether a major activity"
+str3 PV36 %3s "3-digit activity code"
+str1 PV37 %1s "where the activity was performed"
+str2 PV38 %2s "unpaid/paid status of activity"
+str1 PV39 %1s "enterprise type"
+str3 PV40 %3s "NSC"
+str10 PV41 %10s "MULT"
+}
+##CODE END, LINE 111## 
+##SAVE THIS Dictionary File (.dct).## 
+FOR EXAMPLE, it should read something like : "D:\Time Use Data\Time Use 2024\PERSON TUS 2024.dct" 
+## OPEN STATA COMMAND PROMPT## 
+##CODE START, LINE 116##
+infile using ""D:\Time Use Data\Time Use 2024\PERSON TUS 2024.dct"  [Instruction: I am using the example location, you should use your dictionary file location] for PERSON FILE dictionary 
+SAVE THE .DTA FILE EXTRACTED and READ IN STATA. 
