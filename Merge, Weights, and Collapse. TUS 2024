@@ -1,0 +1,104 @@
+***Treat your HH as Master Data File****
+
+use "##YOUR HH FILE.DTA" 
+egen HHID=concat(FSU_SerialNo Sample_HH_no) ##I have named these variables as this, you can follow the readme file, and can follow the way you want to rename. 
+isid HHID  
+
+##If nothing comes back as a response after the isid HHID code: That means you have no duplicates of Household and good to go with the Household File. 
+##SAVE THIS HH File. 
+
+clear
+
+***Create your Using Data and Unique Person ID: Person File***
+
+use "##YOUR PERSON FILE.DTA" 
+egen HHID=concat(FSU_SerialNo Sample_HH_no)
+
+ ***Create Person ID***
+
+egen PID=concat(HHID Person_Serial) 
+##SAVE THIS FILE 
+clear 
+
+***Merging HH File and Person File****
+
+use "##YOUR HH FILE.DTA" 
+merge 1:m HHID using "##YOUR PERSON FILE.DTA PATH LOCATION" [USE COPY AS PATH BY RIGHT CLICKING] 
+drop _merge 
+
+
+***Generating Total_Time for Major Activities***
+***I Must Thank Dr. Vijayamba and Dr. Smriti Rao, For their Blog in the Foundation for Agrarian Studies***
+***Link Here: https://fas.org.in/using-the-india-tus-unit-level-data-some-notes-on-method-and-some-stata-code/*** 
+
+***CODE STARTS IN THE MERGED FILE***
+
+gen double activitytime_from= clock( V108 , "hm")
+gen double activitytime_to = clock( V109 , "hm")
+gen length_timeslot=((activitytime_to-activitytime_from)/(60000)) if activitytime_to>=activitytime_from
+replace length_timeslot= ((((86340000- activitytime_from) + activitytime_to))/60000)+1 if activitytime_to <activitytime_from
+bysort PID: egen total_time=total( length_timeslot)
+
+***WORKING WITH ONLY MAJOR ACTIVITY*** 
+
+destring whether_major, replace
+keep if whether_major==1
+bysort PID: egen total_time=total( length_timeslot)
+sum total_time 
+
+###total_time should have a minimum of 0 and maximum of 1440 minutes## 
+
+***Creating 1 Digit TUS Activity From 3 Digit***
+
+gen activity_TUS=substr( activity_TUS_3digit,1,1)
+destring activity_TUS, replace
+
+###SAVE FILE AS MASTER DATA###
+
+***PERSON LEVEL TIME USE COLUMN CREATION***
+bysort PID: egen employment_time=total(total_time) if activity_TUS==1 
+replace employment_time=0 if employment_time==. 
+bysort PID: egen own_producce_time=total(total_time) if activity_TUS==2 
+replace own_produce_time=0 if own_produce_time==. 
+bysort PID: egen unpaid_domestic=total(total_time) if activity_TUS==3 
+replace unpaid_domestic=0 if unpaid_domestic==. 
+bysort PID: egen unpaid_care=total(total_time) if activity_TUS==4 
+replace unpaid_care=0 if unpaid_care==. 
+bysort PID: egen unpaid_volunteer =total(total_time) if activity_TUS==5 
+replace unpaid_volunteer=0 if unpaid_volunteer==. 
+bysort PID: egen learning=total(total_time) if activity_TUS==6 
+replace learning=0 if learning==. 
+bysort PID: egen socialising_time=total(total_time) if activity_TUS==7 
+replace socialising_time=0 if socialising_time==. 
+bysort PID: egen culture_leisure=total(total_time) if activity_TUS==8 
+replace culture_leisure=0 if culture_leisure==. 
+bysort PID: egen self_care=total(total_time) if activity_TUS==9 
+replace self_care=0 if self_care==. 
+
+****Generate Weight Variable****
+gen wt=round(MULT/100)
+
+***CAUTION: THERE IS ANOTHER WAY OF DOING THE SAME EXERCISE USING RESHAPE COMMAND INSTEAD OF COLLAPSE: I HAVE NOT DONE IT HERE, CODES AVAILABLE AT STATA HELP, FOLLOW NICK COX's THREAD***
+
+***Before Final File Collapsing***
+
+***destring all the relevant variables that you would need for your analysis: I have not added Cleaning, Cooking, Lighting, Sweeping those household information here, same logic appears in case you want to use those***
+
+destring Sector State Sex Age Marital_Status Social_Group Religion Principal_Status NIC_Prinicipal Monthly_consumption HH_Size Education, replace 
+
+***Collapsing Activity Level Time use File to Person Level Time USE*** 
+
+collapse (max)Sector State Sex Age Marital_Status Social_Group Religion Principal_Status NIC_Prinicipal Monthly_consumption HH_Size Education employment_time own_producce_time unpaid_domestic unpaid_care unpaid_volunteer learning socialising_time culture_leisure self_care wt, by (PID) 
+
+***Cross Check***
+***Add All the ICATUS time***
+gen total_time=employment_time+own_producce_time+unpaid_domestic+unpaid_care+unpaid_volunteer+learning+socialising_time+culture_leisure+self_care 
+
+**This total_time should add up to 1440 Minutes.** 
+
+***Cross Check II: Whether PIDs are unique now***
+
+isid PID 
+
+**This should not return variable PID does not uniquely identify observations.** 
+***VOILA YOUR DATA IS READY***
